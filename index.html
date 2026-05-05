@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Siete y Media</title>
+  </head>
+  <body>
+    <main class="app">
+      <h1>Siete y Media (Copas)</h1>
+
+      <div class="card">
+        <img id="cardImg" class="card-img" alt="Carta" />
+      </div>
+
+      <div class="score">
+        Puntuación: <span id="scoreValue">0</span>
+      </div>
+
+      <div id="message" class="message"></div>
+
+      <div class="actions">
+        <button id="btnDraw">Pide carta</button>
+        <button id="btnStand">Me planto</button>
+        <button id="btnNew" class="secondary" hidden>Nueva partida</button>
+      </div>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
