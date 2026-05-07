@@ -1,10 +1,42 @@
-import { BACK_URL, CARD_IMAGE_BY_VALUE, Partida } from "./model";
-import { evaluarPlantarse } from "./motor";
+import { BACK_URL, CARD_IMAGE_BY_VALUE, crearPartida, Partida } from "./model";
+import {
+  dameCarta,
+  estaPartidaTerminada,
+  evaluarPlantarse,
+  plantarse,
+  sumarCartaAPartida,
+} from "./motor";
 
-const $ = <T extends HTMLElement>(id: string): T => {
+export let partida: Partida = crearPartida();
+
+export const $ = (id: string): HTMLElement => {
   const el = document.getElementById(id);
-  if (!el) throw new Error(`No existe #${id}`);
-  return el as T;
+
+  if (el === null) {
+    throw new Error(`No existe #${id}`);
+  }
+
+  return el;
+};
+
+const getCardImg = (): HTMLImageElement => {
+  const img = $("cardImg");
+
+  if (!(img instanceof HTMLImageElement)) {
+    throw new Error("#cardImg no es una imagen.");
+  }
+
+  return img;
+};
+
+const getButton = (id: string): HTMLButtonElement => {
+  const button = $(id);
+
+  if (!(button instanceof HTMLButtonElement)) {
+    throw new Error(`#${id} no es un boton.`);
+  }
+
+  return button;
 };
 
 export const muestraPuntuacion = (puntuacion: number): void => {
@@ -12,7 +44,7 @@ export const muestraPuntuacion = (puntuacion: number): void => {
 };
 
 export const muestraCarta = (carta: number | null): void => {
-  const img = $("cardImg") as HTMLImageElement;
+  const img = getCardImg();
   img.src = carta === null ? BACK_URL : CARD_IMAGE_BY_VALUE[carta] ?? BACK_URL;
 };
 
@@ -21,31 +53,57 @@ export const muestraMensaje = (text: string): void => {
 };
 
 export const setGameOverUI = (isOver: boolean): void => {
-  ($("btnDraw") as HTMLButtonElement).disabled = isOver;
-  ($("btnStand") as HTMLButtonElement).disabled = isOver;
-  ($("btnNew") as HTMLButtonElement).hidden = !isOver;
+  getButton("btnDraw").disabled = isOver;
+  getButton("btnStand").disabled = isOver;
+  getButton("btnNew").hidden = !isOver;
 };
 
-export const pintaPartida = (partida: Partida): void => {
-  muestraPuntuacion(partida.puntuacion);
-  setGameOverUI(partida.gameOver);
+export const pintaPartida = (partidaActual: Partida): void => {
+  muestraPuntuacion(partidaActual.puntuacion);
+  setGameOverUI(estaPartidaTerminada(partidaActual));
 };
 
-export const pintaMensajeEstado = (partida: Partida): void => {
-  if (partida.estado === "perdida") {
-    muestraMensaje("🪦 GAME OVER. Te has pasado de 7,5.");
+export const pintaMensajeEstado = (partidaActual: Partida): void => {
+  if (partidaActual.estado === "perdida") {
+    muestraMensaje("GAME OVER. Te has pasado de 7,5.");
     return;
   }
 
-  if (partida.estado === "ganada") {
+  if (partidaActual.estado === "ganada") {
     muestraMensaje("¡Lo has clavado! ¡Enhorabuena!");
     return;
   }
 
-  if (partida.estado === "plantada") {
-    muestraMensaje(evaluarPlantarse(partida.puntuacion));
+  if (partidaActual.estado === "plantada") {
+    muestraMensaje(evaluarPlantarse(partidaActual.puntuacion));
     return;
   }
 
   muestraMensaje("¿Pides otra carta o te plantas?");
+};
+
+export const onDraw = (): void => {
+  if (estaPartidaTerminada(partida)) return;
+
+  const carta = dameCarta();
+  muestraCarta(carta);
+
+  partida = sumarCartaAPartida(partida, carta);
+  pintaPartida(partida);
+  pintaMensajeEstado(partida);
+};
+
+export const onStand = (): void => {
+  if (estaPartidaTerminada(partida)) return;
+
+  partida = plantarse(partida);
+  pintaPartida(partida);
+  pintaMensajeEstado(partida);
+};
+
+export const nuevaPartida = (): void => {
+  partida = crearPartida();
+  muestraCarta(null);
+  pintaPartida(partida);
+  muestraMensaje("");
 };

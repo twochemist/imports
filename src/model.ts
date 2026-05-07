@@ -2,7 +2,6 @@ export type EstadoPartida = "jugando" | "ganada" | "perdida" | "plantada";
 
 export interface Partida {
   puntuacion: number;
-  gameOver: boolean;
   estado: EstadoPartida;
 }
 
@@ -26,6 +25,5 @@ export const CARD_IMAGE_BY_VALUE: Record<number, string> = {
 
 export const crearPartida = (): Partida => ({
   puntuacion: 0,
-  gameOver: false,
   estado: "jugando",
 });
